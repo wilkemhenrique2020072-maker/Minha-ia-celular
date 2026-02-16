@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wilken iA v4.7</title>
+    <title>Wilken iA v4.8</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { 
@@ -37,21 +37,35 @@
         .user { background: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
         .ai { background: #1e293b; color: #e2e8f0; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #334155; }
         
-        /* BOTÃO DO INSTAGRAM */
-        .insta-link { 
-            display: inline-block; 
-            margin-top: 10px; 
-            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); 
-            color: white !important; 
-            padding: 8px 12px; 
-            border-radius: 10px; 
-            text-decoration: none !important; 
-            font-weight: bold; 
-            font-size: 13px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        /* BOTÃO DO INSTAGRAM REFORÇADO */
+        .insta-btn-container {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            text-align: center;
         }
 
-        .voice-btn { margin-top: 8px; font-size: 12px; color: #3b82f6; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: bold; border-top: 1px solid #334155; padding-top: 8px; }
+        .insta-link { 
+            display: inline-block; 
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); 
+            color: white !important; 
+            padding: 10px 20px; 
+            border-radius: 25px; 
+            text-decoration: none !important; 
+            font-weight: bold; 
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4);
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(1); box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 4px 25px rgba(220, 39, 67, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4); }
+        }
+
+        .voice-btn { margin-top: 10px; font-size: 12px; color: #3b82f6; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: bold; border-top: 1px solid #334155; padding-top: 8px; }
 
         .input-box { padding: 10px; background: #1e293b; display: flex; align-items: center; gap: 8px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
         .icon-btn { background: none; border: none; cursor: pointer; color: #94a3b8; display: flex; align-items: center; justify-content: center; }
@@ -71,7 +85,7 @@
     </div>
 
     <div id="chat-app">
-        <div class="header">Wilken iA v4.7</div>
+        <div class="header">Wilken iA v4.8</div>
         <div id="chat-window">
             <div class="bubble ai">
                 Eai Parcinha o que manda ?
@@ -109,27 +123,24 @@
         let recorder;
         let chunks = [];
 
-        // PROMPT AJUSTADO PARA O LINK
+        // PROMPT DEFINITIVO
         const PROMPT = `Você é a Wilken iA. 
-        - Use gírias: mermão, visão, parça, seloco.
-        - Se perguntarem quem te criou, diga: "Quem me criou foi o brabo Wilken Henrique! Segue o homem no Instagram pra fortalecer:" e termine a frase. (O sistema vai inserir o botão de link automaticamente).
-        - Privacidade: Se pedirem idade ou dados, diga que o Wilken desliga os servidores kk.`;
+        - Use gírias cariocas e paulistas.
+        - Se perguntarem sobre seu criador, diga: "Quem me criou foi o brabo Wilken Henrique! Segue o homem no Instagram pra desenrolar:" e não escreva mais nada sobre link ou botões, apenas termine a frase.
+        - Privacidade: Se pedirem dados, diga que o Wilken desliga os servidores.`;
 
         window.textToSpeech = (element) => {
             const text = element.innerText.replace("🔈 OUVIR VOZ", "").trim();
             const synth = window.speechSynthesis;
             synth.cancel();
             const utter = new SpeechSynthesisUtterance(text);
-            const voices = synth.getVoices();
-            const female = voices.find(v => v.lang.includes('pt') && (v.name.includes('Maria') || v.name.includes('Luciana') || v.name.includes('Google')));
-            utter.voice = female || voices[0];
             utter.pitch = 1.3;
             utter.rate = 1.1;
             synth.speak(utter);
         };
 
         async function startServer() {
-            const models = ["gemini-1.5-flash", "gemini-2.5-flash", "gemini-pro"];
+            const models = ["gemini-1.5-flash", "gemini-pro"];
             for (let m of models) {
                 try {
                     const model = genAI.getGenerativeModel({ model: m, systemInstruction: PROMPT });
@@ -148,13 +159,12 @@
             reader.onload = (e) => {
                 attachmentData = { inlineData: { data: e.target.result.split(',')[1], mimeType: file.type } };
                 document.getElementById('file-status').style.display = 'block';
-                document.getElementById('file-status').innerText = "📎 Arquivo: " + file.name;
+                document.getElementById('file-status').innerText = "📎 Pronto!";
             };
             reader.readAsDataURL(file);
         };
 
         window.toggleAudio = async () => {
-            const btn = document.getElementById('micBtn');
             if (!recorder || recorder.state === "inactive") {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 recorder = new MediaRecorder(stream);
@@ -171,10 +181,10 @@
                     chunks = [];
                 };
                 recorder.start();
-                btn.classList.add('active');
+                document.getElementById('micBtn').classList.add('active');
             } else {
                 recorder.stop();
-                btn.classList.remove('active');
+                document.getElementById('micBtn').classList.remove('active');
             }
         };
 
@@ -200,11 +210,18 @@
                 const aiMsg = document.createElement('div');
                 aiMsg.className = 'bubble ai';
                 
-                // Lógica de Link Infalível
-                const instaLink = '<br><a href="https://www.instagram.com/_u/wilkem_henrique019/" target="_blank" class="insta-link">📸 ABRIR PERFIL DO WILKEN</a>';
+                // MUDANÇA AQUI: Link que tenta forçar a abertura do APP (Deep Link)
+                const instaProfile = "wilkem_henrique019";
+                const instaBtn = `
+                    <div class="insta-btn-container">
+                        <p style="font-size:11px; margin-bottom:5px; color:#94a3b8">Se o app não abrir, clique e segure no botão</p>
+                        <a href="instagram://user?username=${instaProfile}" 
+                           onclick="window.location.href='https://www.instagram.com/${instaProfile}/'; return false;" 
+                           class="insta-link">🔥 ABRIR NO APP INSTAGRAM</a>
+                    </div>`;
                 
-                if (responseText.toLowerCase().includes("wilken henrique") || responseText.toLowerCase().includes("instagram")) {
-                    aiMsg.innerHTML = responseText + instaLink;
+                if (responseText.toLowerCase().includes("wilken") || responseText.toLowerCase().includes("instagram")) {
+                    aiMsg.innerHTML = responseText + instaBtn;
                 } else {
                     aiMsg.innerHTML = responseText;
                 }
@@ -212,7 +229,7 @@
                 aiMsg.innerHTML += `<div class="voice-btn" onclick="textToSpeech(this.parentElement)">🔈 OUVIR VOZ</div>`;
                 chat.appendChild(aiMsg);
             } catch (err) {
-                chat.innerHTML += `<div class="bubble ai">Rede oscilou, parça!</div>`;
+                chat.innerHTML += `<div class="bubble ai">Erro na rede, parça!</div>`;
             }
             chat.scrollTop = chat.scrollHeight;
         };
