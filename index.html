@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wilken iA v4.9</title>
+    <title>Wilken iA v5.0</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { 
@@ -12,20 +12,20 @@
             height: 100dvh; display: flex; justify-content: center; align-items: center; overflow: hidden;
         }
 
-        /* SCAN INICIAL LIMPO */
+        /* TELA DE SCAN (SÓ SAI QUANDO CONECTAR) */
         #loader-screen {
             position: fixed; inset: 0; background: #020617;
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
         }
         .scanner-ring { 
-            width: 70px; height: 70px; 
+            width: 75px; height: 75px; 
             border: 3px solid rgba(37, 99, 235, 0.1); 
             border-top: 3px solid #3b82f6; 
             border-radius: 50%; 
             animation: spin 0.8s linear infinite; 
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .scan-title { margin-top: 25px; color: #3b82f6; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; }
+        .scan-title { margin-top: 25px; color: #3b82f6; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; text-align: center; padding: 0 20px; }
 
         /* INTERFACE */
         #chat-app { display: none; width: 100%; height: 100dvh; max-width: 600px; background: #0f172a; flex-direction: column; }
@@ -37,34 +37,39 @@
         .user { background: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
         .ai { background: #1e293b; color: #e2e8f0; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #334155; }
         
+        /* BOTÃO DO INSTAGRAM */
         .insta-btn { 
             display: inline-block; margin-top: 10px; 
             background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); 
             color: white !important; padding: 10px 15px; border-radius: 12px; 
             text-decoration: none !important; font-weight: bold; font-size: 13px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        .voice-btn { margin-top: 8px; font-size: 12px; color: #3b82f6; cursor: pointer; font-weight: bold; border-top: 1px solid #334155; padding-top: 8px; }
+        .voice-btn { margin-top: 10px; font-size: 12px; color: #3b82f6; cursor: pointer; font-weight: bold; border-top: 1px solid #334155; padding-top: 8px; display: flex; align-items: center; gap: 5px; }
 
+        /* INPUT AREA */
         .input-box { padding: 10px; background: #1e293b; display: flex; align-items: center; gap: 8px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
-        .icon-btn { background: none; border: none; cursor: pointer; color: #94a3b8; }
+        .icon-btn { background: none; border: none; cursor: pointer; color: #94a3b8; padding: 5px; }
         .icon-btn.active { color: #ef4444; }
 
         input { flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #334155; background: #020617; color: white; outline: none; font-size: 16px; }
         #sendBtn { background: #2563eb; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; }
 
-        #file-status { display: none; background: #1e293b; color: #3b82f6; padding: 5px 15px; font-size: 11px; }
+        #file-status { display: none; background: #1e293b; color: #3b82f6; padding: 5px 15px; font-size: 11px; border-top: 1px solid #334155; }
     </style>
 </head>
 <body>
 
+    <!-- TELA DE SCAN (VERIFICAÇÃO OBRIGATÓRIA) -->
     <div id="loader-screen">
         <div class="scanner-ring"></div>
         <div class="scan-title">CONECTANDO SERVIDOR WILKEN IA</div>
     </div>
 
+    <!-- CHAT PRINCIPAL -->
     <div id="chat-app">
-        <div class="header">Wilken iA v4.9</div>
+        <div class="header">Wilken iA v5.0</div>
         <div id="chat-window">
             <div class="bubble ai">
                 Eai Parcinha o que manda ?
@@ -75,11 +80,13 @@
         <div id="file-status"></div>
 
         <div class="input-box">
+            <!-- ANEXAR -->
             <label class="icon-btn">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
                 <input type="file" id="fileInput" style="display:none" onchange="fileSelected(this)">
             </label>
 
+            <!-- MICROFONE -->
             <button class="icon-btn" id="micBtn" onclick="toggleAudio()">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 18v4M8 22h8"/></svg>
             </button>
@@ -102,28 +109,45 @@
         let recorder;
         let chunks = [];
 
-        const PROMPT = `Você é a Wilken iA. Use gírias cariocas e paulistas. Se perguntarem quem te criou, diga: "Quem me criou foi o brabo Wilken Henrique! Segue o homem no Instagram pra desenrolar:". Se pedirem idade ou dados, diga que o Wilken desliga os servidores.`;
+        const PROMPT = `Você é a Wilken iA. Use gírias cariocas e paulistas. Origem: se perguntarem quem te criou, diga que foi o Wilken Henrique e mencione o Instagram dele. Se pedirem idade ou dados, diga que o Wilken desliga os servidores.`;
 
+        // VOZ FEMININA FINA
         window.textToSpeech = (element) => {
             const text = element.innerText.replace("🔈 OUVIR VOZ", "").trim();
             const synth = window.speechSynthesis;
             synth.cancel();
             const utter = new SpeechSynthesisUtterance(text);
-            utter.pitch = 1.4; // Voz bem feminina e fina
+            const voices = synth.getVoices();
+            const female = voices.find(v => v.lang.includes('pt') && (v.name.includes('Maria') || v.name.includes('Google') || v.name.includes('Female')));
+            utter.voice = female || voices[0];
+            utter.pitch = 1.4; // Fina
             utter.rate = 1.0;
-            utter.lang = 'pt-BR';
             synth.speak(utter);
         };
 
-        async function init() {
-            // Inicializa sem fazer ping pra não travar no loop
-            try {
-                activeModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction: PROMPT });
-                setTimeout(() => {
+        // SCAN COM VERIFICAÇÃO DE RESPOSTA
+        async function connectServer() {
+            const scanTitle = document.querySelector('.scan-title');
+            const models = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
+            
+            for (let name of models) {
+                try {
+                    const model = genAI.getGenerativeModel({ model: name, systemInstruction: PROMPT });
+                    // TENTA UMA MENSAGEM DE TESTE (PING)
+                    const result = await model.generateContent("ping");
+                    await result.response;
+                    
+                    // SE CHEGOU AQUI, FUNCIONOU!
+                    activeModel = model;
                     document.getElementById('loader-screen').style.display = 'none';
                     document.getElementById('chat-app').style.display = 'flex';
-                }, 1500);
-            } catch (e) { console.error("Erro ao carregar modelo"); }
+                    return;
+                } catch (e) {
+                    console.log("Erro no modelo: " + name);
+                }
+            }
+            scanTitle.innerText = "ERRO DE CONEXÃO. VERIFIQUE SUA CHAVE API.";
+            scanTitle.style.color = "red";
         }
 
         window.fileSelected = (input) => {
@@ -132,7 +156,7 @@
             reader.onload = (e) => {
                 attachmentData = { inlineData: { data: e.target.result.split(',')[1], mimeType: file.type } };
                 document.getElementById('file-status').style.display = 'block';
-                document.getElementById('file-status').innerText = "📎 Pronto: " + file.name;
+                document.getElementById('file-status').innerText = "📎 Arquivo pronto!";
             };
             reader.readAsDataURL(file);
         };
@@ -183,8 +207,8 @@
                 const aiMsg = document.createElement('div');
                 aiMsg.className = 'bubble ai';
                 
-                // Link direto que tenta abrir o App
-                const instaBtn = `<br><a href="https://www.instagram.com/wilkem_henrique019/" target="_blank" class="insta-btn">🔥 PERFIL DO WILKEN</a>`;
+                // Link do Instagram Inteligente
+                const instaBtn = `<br><a href="instagram://user?username=wilkem_henrique019" onclick="window.location.href='https://www.instagram.com/wilkem_henrique019/'; return false;" class="insta-btn">🔥 PERFIL DO WILKEN</a>`;
                 
                 if (responseText.toLowerCase().includes("wilken") || responseText.toLowerCase().includes("instagram")) {
                     aiMsg.innerHTML = responseText + instaBtn;
@@ -195,12 +219,13 @@
                 aiMsg.innerHTML += `<div class="voice-btn" onclick="textToSpeech(this.parentElement)">🔈 OUVIR VOZ</div>`;
                 chat.appendChild(aiMsg);
             } catch (err) {
-                chat.innerHTML += `<div class="bubble ai">Vish parça, a conexão oscilou. Tenta mandar de novo!</div>`;
+                chat.innerHTML += `<div class="bubble ai">Vish parça, a rede oscilou. Manda de novo!</div>`;
             }
             chat.scrollTop = chat.scrollHeight;
         };
 
-        init();
+        connectServer();
+        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     </script>
 </body>
 </html>
