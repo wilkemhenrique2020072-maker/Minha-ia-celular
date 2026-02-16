@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha IA Gemini</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #f4f4f9; }
+        .chat-container { width: 100%; max-width: 500px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input { width: 75%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #response { margin-top: 20px; white-space: pre-wrap; color: #333; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <h2>IA no Celular</h2>
+        <input type="text" id="userInput" placeholder="Pergunte algo...">
+        <button onclick="askAI()">Enviar</button>
+        <div id="response">O resultado aparecerá aqui...</div>
+    </div>
+
+    <script type="module">
+        import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+
+        // COLOQUE SUA CHAVE DENTRO DAS ASPAS ABAIXO
+        const API_KEY = "AIzaSyBDPCvjIGJ7I7D9rN36VmRuGue5hoELuaI"; 
+        const genAI = new GoogleGenerativeAI(API_KEY);
+
+        window.askAI = async function() {
+            const input = document.getElementById('userInput').value;
+            const responseDiv = document.getElementById('response');
+            if (!input) return;
+            responseDiv.innerText = "Pensando...";
+            try {
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const result = await model.generateContent(input);
+                responseDiv.innerText = result.response.text();
+            } catch (error) {
+                responseDiv.innerText = "Erro: " + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
