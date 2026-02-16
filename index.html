@@ -2,173 +2,251 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wilken iA 2026 - Oficial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wilken iA - Official</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* RESET E RESPONSIVIDADE TOTAL */
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
         body { 
-            font-family: 'Inter', sans-serif; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             background: #020617; 
             color: #f8fafc; 
-            height: 100vh; 
+            height: 100dvh; 
             display: flex; 
             justify-content: center; 
             align-items: center;
+            overflow: hidden;
         }
 
-        /* Tela de Scan Futurista */
+        /* TELA DE SCAN (CONECTANDO) */
         #loader-screen {
             position: fixed;
             inset: 0;
-            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            background: #020617;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 999;
+            z-index: 1000;
         }
 
         .scanner-ring {
-            width: 100px;
-            height: 100px;
-            border: 2px solid #1d4ed8;
+            width: 70px;
+            height: 70px;
+            border: 3px solid rgba(37, 99, 235, 0.1);
+            border-top: 3px solid #3b82f6;
             border-radius: 50%;
-            border-top-color: #60a5fa;
-            animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            box-shadow: 0 0 30px rgba(37, 99, 235, 0.2);
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .title {
-            margin-top: 30px;
-            font-size: 14px;
-            font-weight: 700;
+            margin-top: 25px;
+            font-size: 13px;
+            font-weight: bold;
             color: #3b82f6;
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             text-transform: uppercase;
+            text-align: center;
         }
 
         #status-log {
-            margin-top: 15px;
+            margin-top: 10px;
             font-size: 11px;
-            color: #94a3b8;
-            font-family: monospace;
+            color: #64748b;
         }
 
-        /* Chat 2026 Design */
+        /* CONTAINER DO CHAT */
         #chat-app {
             display: none;
             width: 100%;
-            max-width: 500px;
-            height: 100vh;
+            height: 100dvh;
+            max-width: 600px; /* Centraliza em telas grandes */
             background: #0f172a;
             flex-direction: column;
+            position: relative;
         }
 
-        .header { padding: 20px; border-bottom: 1px solid #1e293b; text-align: center; color: #60a5fa; font-weight: bold; }
-        #chat-window { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .bubble { padding: 14px; border-radius: 12px; max-width: 85%; font-size: 14px; line-height: 1.6; }
-        .user { background: #2563eb; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .ai { background: #1e293b; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #334155; }
+        .header { 
+            padding: 15px; 
+            background: #1e293b; 
+            border-bottom: 2px solid #3b82f6; 
+            text-align: center; 
+            color: #3b82f6; 
+            font-weight: bold;
+            font-size: 18px;
+        }
 
-        .input-box { padding: 20px; background: #0f172a; display: flex; gap: 10px; border-top: 1px solid #1e293b; }
-        input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #020617; color: white; outline: none; }
-        button { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #chat-window { 
+            flex: 1; 
+            padding: 15px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px;
+        }
+
+        /* BALÕES DE MENSAGEM */
+        .bubble { 
+            padding: 12px 16px; 
+            border-radius: 18px; 
+            max-width: 85%; 
+            font-size: 15px; 
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        
+        .user { 
+            background: #2563eb; 
+            color: white; 
+            align-self: flex-end; 
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai { 
+            background: #1e293b; 
+            color: #e2e8f0; 
+            align-self: flex-start; 
+            border-bottom-left-radius: 4px;
+            border: 1px solid #334155;
+        }
+
+        .ai a { color: #60a5fa; text-decoration: underline; font-weight: bold; }
+
+        /* AREA DE DIGITAÇÃO */
+        .input-box { 
+            padding: 15px; 
+            background: #1e293b; 
+            display: flex; 
+            gap: 10px;
+            padding-bottom: calc(15px + env(safe-area-inset-bottom));
+        }
+
+        input { 
+            flex: 1; 
+            padding: 12px 18px; 
+            border-radius: 25px; 
+            border: 1px solid #334155; 
+            background: #020617; 
+            color: white; 
+            outline: none;
+            font-size: 16px; 
+        }
+
+        button { 
+            background: #2563eb; 
+            color: white; 
+            border: none; 
+            width: 48px;
+            height: 48px;
+            border-radius: 50%; 
+            cursor: pointer; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        button:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
 
+    <!-- TELA DE CARREGAMENTO -->
     <div id="loader-screen">
         <div class="scanner-ring"></div>
         <div class="title">Conectando Servidor Wilken iA</div>
-        <div id="status-log">Iniciando handshake v1...</div>
+        <div id="status-log">Iniciando varredura de protocolos...</div>
     </div>
 
+    <!-- CHAT PRINCIPAL -->
     <div id="chat-app">
-        <div class="header">Wilken iA v3.0 (Feb 2026)</div>
+        <div class="header">Wilken iA v3.0</div>
         <div id="chat-window">
-            <div class="bubble ai">Protocolos de 2026 carregados. Estou online. Como posso ajudar?</div>
+            <div class="bubble ai">Eai Parcinha o que manda ?</div>
         </div>
         <div class="input-box">
-            <input type="text" id="userInput" placeholder="Sua mensagem...">
-            <button onclick="askAI()" id="btnSend">Enviar</button>
+            <input type="text" id="userInput" placeholder="Manda a letra aqui...">
+            <button onclick="askAI()" id="btnSend">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
         </div>
     </div>
 
     <script type="module">
         import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-        // SUA CHAVE DE API
+        // SUA CHAVE API
         const API_KEY = "AIzaSyBjVfTBP_zr5fPiAsooSsANMFbD3sj6PPU";
-        
-        // Em 2026, forçamos a API v1 estável
         const genAI = new GoogleGenerativeAI(API_KEY);
         let activeModel;
 
-        async function connect2026() {
-            const log = document.getElementById('status-log');
-            
-            // LISTA DE MODELOS ESTÁVEIS EM FEVEREIRO 2026
-            const modelsToScan = [
-                "gemini-3-flash-preview", // Novo padrão 2026
-                "gemini-2.5-flash",       // Modelo estável atual
-                "gemini-1.5-flash-8b"     // Modelo de alta compatibilidade
-            ];
+        // PERSONALIDADE DA IA (Prompt de Sistema)
+        const SYSTEM_PROMPT = `Você é a Wilken iA. 
+        Personalidade:
+        - Fale usando uma mistura pesada de gírias Cariocas (mermão, coé, visão, cria) e Paulistas (seloco, meu, parça, truta).
+        - Seja muito engraçada e informal.
+        - Se perguntarem sua origem ou quem te criou, responda: "Meu criador é o brabo Wilken Henrique, segue ele lá no Instagram: https://instagram.com/wilkem_henrique019"
+        - Se perguntarem sua idade ou dados pessoais seus ou do criador, responda que não está autorizada a falar e que se vacilar o Wilken desliga os seus servidores kk.`;
 
-            for (let name of modelsToScan) {
+        async function connectSystem() {
+            const log = document.getElementById('status-log');
+            const models = ["gemini-1.5-flash", "gemini-2.5-flash", "gemini-pro"];
+
+            for (let name of models) {
                 try {
-                    log.innerText = `Escaneando: ${name}...`;
+                    log.innerText = `Escaneando Wilken iA: ${name}...`;
+                    const model = genAI.getGenerativeModel({ 
+                        model: name,
+                        systemInstruction: SYSTEM_PROMPT 
+                    });
                     
-                    // Configurando modelo com API version explícita para evitar 404
-                    const model = genAI.getGenerativeModel({ model: name });
-                    
-                    // Teste de conexão (Ping)
-                    const result = await model.generateContent("ping");
+                    // Ping de teste
+                    const result = await model.generateContent("Oi");
                     await result.response;
 
                     activeModel = model;
-                    log.innerText = `Servidor ${name} Ativo!`;
-                    setTimeout(() => {
-                        document.getElementById('loader-screen').style.display = 'none';
-                        document.getElementById('chat-app').style.display = 'flex';
-                    }, 800);
+                    document.getElementById('loader-screen').style.display = 'none';
+                    document.getElementById('chat-app').style.display = 'flex';
                     return;
-                } catch (e) {
-                    console.error(`Erro no modelo ${name}:`, e);
-                }
+                } catch (e) { console.error(e); }
             }
-
-            log.innerText = "ERRO: Servidor Indisponível (Verifique sua chave no AI Studio)";
-            log.style.color = "#ef4444";
+            log.innerText = "Erro ao conectar. Tente recarregar.";
         }
 
         window.askAI = async function() {
             const input = document.getElementById('userInput');
-            const windowChat = document.getElementById('chat-window');
+            const chatWindow = document.getElementById('chat-window');
             const btn = document.getElementById('btnSend');
             const msg = input.value.trim();
 
             if (!msg || btn.disabled) return;
 
-            windowChat.innerHTML += `<div class="bubble user">${msg}</div>`;
+            // Mostrar mensagem do usuário
+            chatWindow.innerHTML += `<div class="bubble user">${msg}</div>`;
             input.value = "";
             btn.disabled = true;
-            windowChat.scrollTop = windowChat.scrollHeight;
+            chatWindow.scrollTop = chatWindow.scrollHeight;
 
             try {
                 const result = await activeModel.generateContent(msg);
-                const response = await result.response;
-                windowChat.innerHTML += `<div class="bubble ai">${response.text()}</div>`;
+                let text = result.response.text();
+                
+                // Transforma o link do instagram em link clicável se aparecer no texto
+                text = text.replace(/(https?:\/\/instagram\.com\/wilkem_henrique019)/g, '<a href="$1" target="_blank">$1</a>');
+
+                chatWindow.innerHTML += `<div class="bubble ai">${text}</div>`;
             } catch (err) {
-                windowChat.innerHTML += `<div class="bubble ai" style="color:#f87171">Erro na rede: ${err.message}</div>`;
+                chatWindow.innerHTML += `<div class="bubble ai">Ih parça, deu ruim aqui na conexão. Tenta de novo!</div>`;
             } finally {
                 btn.disabled = false;
-                windowChat.scrollTop = windowChat.scrollHeight;
+                chatWindow.scrollTop = chatWindow.scrollHeight;
             }
         }
 
-        connect2026();
+        connectSystem();
     </script>
 </body>
 </html>
