@@ -3,240 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wilken iA v5.3</title>
+    <title>Wilken iA v5.5</title>
     <style>
-        /* RESET TOTAL E DESIGN RESPONSIVO */
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            background: #020617; color: #f8fafc; 
-            height: 100dvh; display: flex; justify-content: center; align-items: center; overflow: hidden;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #020617; color: #f8fafc; height: 100dvh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-        /* TELA DE SCAN (SÓ SAI SE CONECTAR) */
-        #loader-screen {
-            position: fixed; inset: 0; background: #020617;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .scanner-ring { 
-            width: 70px; height: 70px; 
-            border: 3px solid rgba(37, 99, 235, 0.1); 
-            border-top: 3px solid #3b82f6; 
-            border-radius: 50%; 
-            animation: spin 0.8s linear infinite; 
-        }
+        /* SCANNER */
+        #loader-screen { position: fixed; inset: 0; background: #020617; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+        .spinner { width: 60px; height: 60px; border: 4px solid rgba(59, 130, 246, 0.1); border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .scan-title { margin-top: 25px; color: #3b82f6; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; text-align: center; }
-        #error-msg { margin-top: 15px; font-size: 11px; color: #ef4444; max-width: 80%; text-align: center; display: none; }
+        .title { margin-top: 25px; color: #3b82f6; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; }
+        #debug-info { margin-top: 15px; font-size: 11px; color: #ef4444; max-width: 85%; text-align: center; font-family: monospace; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 5px; display: none; }
 
-        /* APP PRINCIPAL */
+        /* INTERFACE */
         #chat-app { display: none; width: 100%; height: 100dvh; max-width: 600px; background: #0f172a; flex-direction: column; }
-        .header { padding: 15px; background: #1e293b; border-bottom: 2px solid #3b82f6; text-align: center; color: #3b82f6; font-weight: bold; font-size: 18px; }
-        
+        .header { padding: 15px; background: #1e293b; border-bottom: 2px solid #3b82f6; text-align: center; color: #3b82f6; font-weight: bold; }
         #chat-window { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .bubble { padding: 12px 16px; border-radius: 18px; max-width: 85%; font-size: 15px; line-height: 1.5; word-wrap: break-word; }
+        .user { background: #2563eb; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .ai { background: #1e293b; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #334155; }
         
-        .bubble { padding: 12px 16px; border-radius: 18px; max-width: 85%; font-size: 15px; line-height: 1.5; position: relative; word-wrap: break-word; }
-        .user { background: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .ai { background: #1e293b; color: #e2e8f0; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #334155; }
-        
-        /* BOTÃO INSTAGRAM */
-        .insta-btn { 
-            display: inline-block; margin-top: 10px; 
-            background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); 
-            color: white !important; padding: 10px 15px; border-radius: 12px; 
-            text-decoration: none !important; font-weight: bold; font-size: 13px;
-        }
+        .voice-btn { margin-top: 8px; font-size: 12px; color: #3b82f6; cursor: pointer; font-weight: bold; border-top: 1px solid #334155; padding-top: 8px; }
+        .insta-btn { display: inline-block; margin-top: 10px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: white!important; padding: 10px 15px; border-radius: 12px; text-decoration: none!important; font-weight: bold; font-size: 13px; }
 
-        .voice-btn { margin-top: 10px; font-size: 12px; color: #3b82f6; cursor: pointer; font-weight: bold; border-top: 1px solid #334155; padding-top: 8px; display: flex; align-items: center; gap: 5px; }
-
-        /* BARRA DE COMANDO */
         .input-box { padding: 10px; background: #1e293b; display: flex; align-items: center; gap: 8px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
-        .icon-btn { background: none; border: none; cursor: pointer; color: #94a3b8; padding: 5px; }
-        .icon-btn.active { color: #ef4444; }
-
-        input { flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #334155; background: #020617; color: white; outline: none; font-size: 16px; }
-        #sendBtn { background: #2563eb; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
-
-        #file-status { display: none; background: #1e293b; color: #3b82f6; padding: 5px 15px; font-size: 11px; border-top: 1px solid #334155; }
+        input { flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #334155; background: #020617; color: white; outline: none; font-size: 16px; }
+        button { background: #2563eb; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .icon-btn { background: none; border: none; color: #94a3b8; cursor: pointer; }
+        #file-status { display: none; background: #1e293b; color: #3b82f6; padding: 5px; font-size: 11px; text-align: center; border-top: 1px solid #334155; }
     </style>
 </head>
 <body>
 
-    <!-- SCANNER DE ENTRADA -->
     <div id="loader-screen">
-        <div class="scanner-ring"></div>
-        <div class="scan-title">CONECTANDO SERVIDOR WILKEN IA</div>
-        <div id="error-msg">Aguardando sinal do Google...</div>
+        <div class="spinner"></div>
+        <div class="title">CONECTANDO SERVIDOR WILKEN IA</div>
+        <div id="debug-info"></div>
     </div>
 
-    <!-- CHAT -->
     <div id="chat-app">
-        <div class="header">Wilken iA v5.3</div>
+        <div class="header">Wilken iA v5.5 🚀</div>
         <div id="chat-window">
-            <div class="bubble ai">
-                Eai Parcinha o que manda ?
-                <div class="voice-btn" onclick="textToSpeech(this.parentElement)">🔈 OUVIR VOZ</div>
-            </div>
+            <div class="bubble ai">Eai Parcinha o que manda ?<div class="voice-btn" onclick="speak(this.parentElement)">🔈 OUVIR VOZ</div></div>
         </div>
-        
         <div id="file-status"></div>
-
         <div class="input-box">
-            <label class="icon-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
-                <input type="file" id="fileInput" style="display:none" onchange="fileSelected(this)">
-            </label>
-
-            <button class="icon-btn" id="micBtn" onclick="toggleAudio()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 18v4M8 22h8"/></svg>
-            </button>
-
+            <label class="icon-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg><input type="file" id="fileInput" style="display:none" onchange="handleFile(this)"></label>
+            <button class="icon-btn" id="micBtn" onclick="handleMic()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 18v4M8 22h8"/></svg></button>
             <input type="text" id="userInput" placeholder="Manda a letra...">
-            
-            <button onclick="askAI()" id="sendBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </button>
+            <button onclick="askAI()" id="sendBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
         </div>
     </div>
 
     <script type="module">
         import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-        // SUA NOVA CHAVE API
+        // SUA CHAVE
         const API_KEY = "AIzaSyCKZParZOKJvXfHG-9fzQEaF1okZs8Xq14";
         const genAI = new GoogleGenerativeAI(API_KEY);
         let activeModel;
-        let attachmentData = null;
+        let attach = null;
         let recorder;
         let chunks = [];
 
-        const PROMPT = `Você é a Wilken iA. 
-        Personalidade: Mistura de gírias Cariocas e Paulistas (visão, parça, seloco, mermão, cria). Muito engraçada e direta.
-        Origem: Se perguntarem quem te criou, diga obrigatoriamente que foi o brabo Wilken Henrique e recomende o Instagram: https://www.instagram.com/wilkem_henrique019/
-        Segurança: Se pedirem idade ou dados pessoais, diga que o Wilken desliga os servidores kk.`;
+        const PROMPT = `Você é a Wilken iA. Use gírias cariocas e paulistas (visão, parça, seloco, mermão). Se perguntarem quem criou, diga Wilken Henrique e Instagram: https://www.instagram.com/wilkem_henrique019/. Se pedirem dados, diga que o Wilken desliga os servidores.`;
 
-        // VOZ FEMININA FINA E HUMANIZADA
-        window.textToSpeech = (element) => {
-            const text = element.innerText.replace("🔈 OUVIR VOZ", "").trim();
-            const synth = window.speechSynthesis;
-            synth.cancel();
-            const utter = new SpeechSynthesisUtterance(text);
-            const voices = synth.getVoices();
-            // Tenta achar voz feminina em PT-BR
-            const female = voices.find(v => v.lang.includes('pt') && (v.name.includes('Maria') || v.name.includes('Luciana') || v.name.includes('Female')));
-            utter.voice = female || voices[0];
-            utter.pitch = 1.4; // Tom fino
-            utter.rate = 1.05; // Velocidade natural
-            synth.speak(utter);
+        window.speak = (el) => {
+            const t = el.innerText.replace("🔈 OUVIR VOZ", "").trim();
+            const synth = window.speechSynthesis; synth.cancel();
+            const u = new SpeechSynthesisUtterance(t);
+            u.pitch = 1.4; u.lang = 'pt-BR'; synth.speak(u);
         };
 
-        // SCANNER DE MODELOS DISPONÍVEIS
-        async function runHandshake() {
-            const errorLabel = document.getElementById('error-msg');
-            const models = ["gemini-1.5-flash", "gemini-2.0-flash-exp", "gemini-pro"];
-            
-            for (let name of models) {
-                try {
-                    const model = genAI.getGenerativeModel({ model: name, systemInstruction: PROMPT });
-                    // Teste real de conexão
-                    const test = await model.generateContent("Oi");
-                    await test.response;
-                    
-                    activeModel = model;
-                    document.getElementById('loader-screen').style.display = 'none';
-                    document.getElementById('chat-app').style.display = 'flex';
-                    return;
-                } catch (e) {
-                    console.log("Falha no modelo: " + name);
-                    errorLabel.style.display = "block";
-                    errorLabel.innerText = "Tentando conexão alternativa...";
-                }
+        async function init() {
+            const debug = document.getElementById('debug-info');
+            try {
+                // Tenta carregar o modelo sem o ping primeiro
+                activeModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction: PROMPT });
+                
+                // TESTE REAL DE CONEXÃO
+                const result = await activeModel.generateContent("ping");
+                await result.response;
+
+                document.getElementById('loader-screen').style.display = 'none';
+                document.getElementById('chat-app').style.display = 'flex';
+            } catch (e) {
+                debug.style.display = "block";
+                debug.innerText = "ERRO DETALHADO: " + e.message;
+                console.error(e);
             }
-            document.querySelector('.scan-title').innerText = "ERRO: VERIFIQUE SUA CHAVE NO GOOGLE";
-            errorLabel.innerText = "A chave pode estar inativa ou sem permissão.";
         }
 
-        window.fileSelected = (input) => {
-            const file = input.files[0];
+        window.handleFile = (input) => {
+            const f = input.files[0];
             const reader = new FileReader();
             reader.onload = (e) => {
-                attachmentData = { inlineData: { data: e.target.result.split(',')[1], mimeType: file.type } };
+                attach = { inlineData: { data: e.target.result.split(',')[1], mimeType: f.type } };
                 document.getElementById('file-status').style.display = 'block';
-                document.getElementById('file-status').innerText = "📎 Arquivo Selecionado";
+                document.getElementById('file-status').innerText = "📎 Arquivo carregado!";
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(f);
         };
 
-        window.toggleAudio = async () => {
+        window.handleMic = async () => {
             const btn = document.getElementById('micBtn');
             if (!recorder || recorder.state === "inactive") {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                recorder = new MediaRecorder(stream);
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                recorder = new MediaRecorder(s);
                 recorder.ondataavailable = (e) => chunks.push(e.data);
                 recorder.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'audio/mp3' });
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        attachmentData = { inlineData: { data: e.target.result.split(',')[1], mimeType: "audio/mp3" } };
+                    const b = new Blob(chunks, { type: 'audio/mp3' });
+                    const r = new FileReader();
+                    r.onload = (e) => {
+                        attach = { inlineData: { data: e.target.result.split(',')[1], mimeType: "audio/mp3" } };
                         document.getElementById('file-status').style.display = 'block';
-                        document.getElementById('file-status').innerText = "🎙️ Áudio Gravado";
+                        document.getElementById('file-status').innerText = "🎙️ Áudio gravado!";
                     };
-                    reader.readAsDataURL(blob);
-                    chunks = [];
+                    reader.readAsDataURL(b); chunks = [];
                 };
-                recorder.start();
-                btn.classList.add('active');
+                recorder.start(); btn.style.color = 'red';
             } else {
-                recorder.stop();
-                btn.classList.remove('active');
+                recorder.stop(); btn.style.color = '#94a3b8';
             }
         };
 
         window.askAI = async () => {
-            const input = document.getElementById('userInput');
-            const chat = document.getElementById('chat-window');
-            const text = input.value.trim();
-            const btn = document.getElementById('sendBtn');
+            const i = document.getElementById('userInput');
+            const w = document.getElementById('chat-window');
+            const t = i.value.trim();
+            if (!t && !attach) return;
 
-            if (!text && !attachmentData) return;
-
-            chat.innerHTML += `<div class="bubble user">${text || "Arquivo/Áudio enviado"}</div>`;
-            input.value = "";
-            btn.disabled = true;
-            document.getElementById('file-status').style.display = 'none';
-            chat.scrollTop = chat.scrollHeight;
+            w.innerHTML += `<div class="bubble user">${t || "Enviou um anexo"}</div>`;
+            i.value = ""; document.getElementById('file-status').style.display = 'none';
+            w.scrollTop = w.scrollHeight;
 
             try {
-                const parts = [text || "Analise este conteúdo"];
-                if (attachmentData) parts.push(attachmentData);
+                const parts = [t || "Analise isso"];
+                if (attach) parts.push(attach);
+                const r = await activeModel.generateContent(parts);
+                const res = r.response.text(); attach = null;
 
-                const result = await activeModel.generateContent(parts);
-                let responseText = result.response.text();
-                attachmentData = null;
-
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'bubble ai';
-                
-                // Link do Insta Otimizado para App
-                const instaBtn = `<br><a href="https://www.instagram.com/wilkem_henrique019/" target="_blank" class="insta-btn">🔥 SEGUIR O WILKEN</a>`;
-                
-                if (responseText.toLowerCase().includes("wilken") || responseText.toLowerCase().includes("instagram")) {
-                    aiMsg.innerHTML = responseText + instaBtn;
-                } else {
-                    aiMsg.innerHTML = responseText;
-                }
-
-                aiMsg.innerHTML += `<div class="voice-btn" onclick="textToSpeech(this.parentElement)">🔈 OUVIR VOZ</div>`;
-                chat.appendChild(aiMsg);
-            } catch (err) {
-                chat.innerHTML += `<div class="bubble ai" style="color:#ff6b6b">Vish parça, a rede oscilou. Manda de novo!</div>`;
-            } finally {
-                btn.disabled = false;
-                chat.scrollTop = chat.scrollHeight;
-            }
+                const m = document.createElement('div');
+                m.className = 'bubble ai';
+                const insta = `<br><a href="https://www.instagram.com/wilkem_henrique019/" target="_blank" class="insta-btn">📸 SEGUIR O WILKEN</a>`;
+                m.innerHTML = (res.toLowerCase().includes("wilken") ? res + insta : res) + `<div class="voice-btn" onclick="speak(this.parentElement)">🔈 OUVIR VOZ</div>`;
+                w.appendChild(m);
+            } catch (e) { w.innerHTML += `<div class="bubble ai" style="color:red">Erro: Chave expirada ou rede instável.</div>`; }
+            w.scrollTop = w.scrollHeight;
         };
 
-        runHandshake();
+        init();
         window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     </script>
 </body>
