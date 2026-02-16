@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wilken iA v5.6</title>
+    <title>Wilken iA v5.7</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Segoe UI', sans-serif; background: #020617; color: #f8fafc; height: 100dvh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
@@ -13,9 +13,9 @@
         .spinner { width: 60px; height: 60px; border: 4px solid rgba(59, 130, 246, 0.1); border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .title { margin-top: 25px; color: #3b82f6; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; }
-        #debug-info { margin-top: 15px; font-size: 11px; color: #ef4444; max-width: 85%; text-align: center; font-family: monospace; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 5px; display: none; }
+        #debug-info { margin-top: 15px; font-size: 11px; color: #ef4444; max-width: 85%; text-align: center; font-family: monospace; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 5px; }
 
-        /* INTERFACE */
+        /* CHAT */
         #chat-app { display: none; width: 100%; height: 100dvh; max-width: 600px; background: #0f172a; flex-direction: column; }
         .header { padding: 15px; background: #1e293b; border-bottom: 2px solid #3b82f6; text-align: center; color: #3b82f6; font-weight: bold; }
         #chat-window { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
@@ -37,12 +37,12 @@
 
     <div id="loader-screen">
         <div class="spinner"></div>
-        <div class="title">CONECTANDO SERVIDOR WILKEN IA</div>
-        <div id="debug-info">Sincronizando com Google AI v1...</div>
+        <div class="title">Conectando Wilken iA v5.7</div>
+        <div id="debug-info">Autenticando com Google Cloud...</div>
     </div>
 
     <div id="chat-app">
-        <div class="header">Wilken iA v5.6 🚀</div>
+        <div class="header">Wilken iA 2026</div>
         <div id="chat-window">
             <div class="bubble ai">Eai Parcinha o que manda ?<div class="voice-btn" onclick="speak(this.parentElement)">🔈 OUVIR VOZ</div></div>
         </div>
@@ -58,61 +58,58 @@
     <script type="module">
         import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-        // SUA CHAVE
-        const API_KEY = "AIzaSyCKZParZOKJvXfHG-9fzQEaF1okZs8Xq14";
+        // SUA CHAVE (Limpando espaços automaticamente)
+        const RAW_KEY = "AIzaSyCKZParZOKJvXfHG-9fzQEaF1okZs8Xq14";
+        const API_KEY = RAW_KEY.trim(); 
+        
         const genAI = new GoogleGenerativeAI(API_KEY);
         let activeModel;
         let attach = null;
         let recorder;
         let chunks = [];
 
-        const PROMPT = `Você é a Wilken iA. Use gírias cariocas e paulistas. Se perguntarem quem criou, diga Wilken Henrique e Instagram: https://www.instagram.com/wilkem_henrique019/. Se pedirem idade ou dados, diga que o Wilken desliga os servidores.`;
+        const PROMPT = "Você é a Wilken iA. Use gírias cariocas e paulistas. Criador: Wilken Henrique (Instagram: https://www.instagram.com/wilkem_henrique019/). Se pedirem dados, diga que o Wilken desliga os servidores.";
 
         window.speak = (el) => {
             const t = el.innerText.replace("🔈 OUVIR VOZ", "").trim();
-            const synth = window.speechSynthesis; synth.cancel();
+            const s = window.speechSynthesis; s.cancel();
             const u = new SpeechSynthesisUtterance(t);
-            u.pitch = 1.4; u.lang = 'pt-BR'; synth.speak(u);
+            u.pitch = 1.4; u.lang = 'pt-BR'; s.speak(u);
         };
 
         async function init() {
             const debug = document.getElementById('debug-info');
-            debug.style.display = "block";
-            
-            // Tentando modelos com os novos nomes de 2026 para evitar o erro 404
-            const modelsToTry = ["gemini-1.5-flash-latest", "gemini-1.5-flash", "gemini-pro"];
+            // LISTA DE MODELOS 2026
+            const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-pro"];
 
-            for (let mName of modelsToTry) {
+            for (let mName of models) {
                 try {
-                    debug.innerText = "Escaneando Wilken iA: " + mName;
+                    debug.innerText = "Sincronizando: " + mName;
                     activeModel = genAI.getGenerativeModel({ model: mName, systemInstruction: PROMPT });
                     
-                    // Força um teste de conexão
                     const result = await activeModel.generateContent("ping");
                     await result.response;
 
-                    // Se funcionar, abre o chat
                     document.getElementById('loader-screen').style.display = 'none';
                     document.getElementById('chat-app').style.display = 'flex';
                     return; 
                 } catch (e) {
-                    console.warn("Falha no modelo " + mName, e);
-                    debug.innerText = "Ajustando protocolos...";
+                    console.error(e);
+                    debug.innerText = "Falha no protocolo: " + mName + "\nMotivo: " + e.message;
                 }
             }
-            
-            debug.innerText = "ERRO CRÍTICO: O Google não reconheceu sua chave. Tente criar uma nova com outro e-mail.";
+            debug.innerText = "ERRO FINAL: Verifique se você ativou a 'Generative Language API' no Google AI Studio para essa chave.";
         }
 
         window.handleFile = (input) => {
             const f = input.files[0];
-            const reader = new FileReader();
-            reader.onload = (e) => {
+            const r = new FileReader();
+            r.onload = (e) => {
                 attach = { inlineData: { data: e.target.result.split(',')[1], mimeType: f.type } };
                 document.getElementById('file-status').style.display = 'block';
-                document.getElementById('file-status').innerText = "📎 Arquivo carregado!";
+                document.getElementById('file-status').innerText = "📎 Arquivo pronto!";
             };
-            reader.readAsDataURL(f);
+            r.readAsDataURL(f);
         };
 
         window.handleMic = async () => {
@@ -127,7 +124,7 @@
                     r.onload = (e) => {
                         attach = { inlineData: { data: e.target.result.split(',')[1], mimeType: "audio/mp3" } };
                         document.getElementById('file-status').style.display = 'block';
-                        document.getElementById('file-status').innerText = "🎙️ Áudio gravado!";
+                        document.getElementById('file-status').innerText = "🎙️ Áudio pronto!";
                     };
                     reader.readAsDataURL(b); chunks = [];
                 };
@@ -148,9 +145,9 @@
             w.scrollTop = w.scrollHeight;
 
             try {
-                const parts = [t || "Analise isso"];
-                if (attach) parts.push(attach);
-                const r = await activeModel.generateContent(parts);
+                const p = [t || "Analise isso"];
+                if (attach) p.push(attach);
+                const r = await activeModel.generateContent(p);
                 const res = r.response.text(); attach = null;
 
                 const m = document.createElement('div');
@@ -158,7 +155,7 @@
                 const insta = `<br><a href="https://www.instagram.com/wilkem_henrique019/" target="_blank" class="insta-btn">📸 SEGUIR O WILKEN</a>`;
                 m.innerHTML = (res.toLowerCase().includes("wilken") ? res + insta : res) + `<div class="voice-btn" onclick="speak(this.parentElement)">🔈 OUVIR VOZ</div>`;
                 w.appendChild(m);
-            } catch (e) { w.innerHTML += `<div class="bubble ai" style="color:red">Erro: Chave expirada ou rede instável.</div>`; }
+            } catch (e) { w.innerHTML += `<div class="bubble ai" style="color:red">Conexão perdida. Tente novamente.</div>`; }
             w.scrollTop = w.scrollHeight;
         };
 
