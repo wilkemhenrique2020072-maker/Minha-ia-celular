@@ -3,211 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wilken iA - Servidor</title>
+    <title>Wilken iA - Diagnóstico</title>
     <style>
-        /* Estilo Dark Futurista */
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            background: #0b0f1a; 
-            color: #e2e8f0; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-        }
-
-        /* Tela de Carregamento / Scan */
-        #loader { 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: #0b0f1a; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 9999; 
-        }
-
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(59, 130, 246, 0.1);
-            border-left-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
+        body { font-family: sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; text-align: center; }
+        .box { background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #3b82f6; width: 100%; max-width: 400px; }
+        .error-log { background: #000; color: #ff4444; padding: 10px; border-radius: 5px; margin-top: 10px; font-family: monospace; font-size: 12px; text-align: left; overflow-x: auto; }
+        .loading { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        #status-text {
-            margin-top: 20px;
-            font-size: 18px;
-            letter-spacing: 1px;
-            color: #3b82f6;
-            font-weight: bold;
-        }
-
-        /* Container Principal do Chat */
-        .chat-app { 
-            display: none; /* Escondido durante o scan */
-            width: 95%; 
-            max-width: 500px; 
-            height: 90vh;
-            background: #161e2d; 
-            border-radius: 20px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid #1e293b;
-        }
-
-        .header { 
-            padding: 20px; 
-            background: #1e293b; 
-            text-align: center; 
-            font-weight: bold;
-            font-size: 20px;
-            color: #3b82f6;
-            border-bottom: 1px solid #334155;
-        }
-
-        #chat-window { 
-            flex: 1; 
-            padding: 20px; 
-            overflow-y: auto; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-        }
-
-        .msg { padding: 12px 16px; border-radius: 15px; max-width: 80%; line-height: 1.4; font-size: 15px; }
-        .user { background: #3b82f6; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .ai { background: #334155; color: #f1f5f9; align-self: flex-start; border-bottom-left-radius: 2px; }
-
-        .input-area { 
-            padding: 20px; 
-            background: #1e293b; 
-            display: flex; 
-            gap: 10px; 
-        }
-
-        input { 
-            flex: 1; 
-            padding: 12px; 
-            border-radius: 10px; 
-            border: 1px solid #334155; 
-            background: #0b0f1a; 
-            color: white; 
-            outline: none; 
-        }
-
-        button { 
-            background: #3b82f6; 
-            color: white; 
-            border: none; 
-            padding: 0 20px; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-weight: bold; 
-        }
-
-        button:active { transform: scale(0.95); }
+        button { margin-top: 15px; padding: 10px; background: #3b82f6; border: none; color: white; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- TELA DE SCAN -->
-    <div id="loader">
-        <div class="spinner"></div>
-        <div id="status-text">Conectando Servidor Wilken iA</div>
+    <div class="box" id="setup-box">
+        <div id="loader" class="loading" style="margin: 0 auto;"></div>
+        <h3 id="msg">Conectando Servidor Wilken iA</h3>
+        <p style="font-size: 12px; color: #94a3b8;">Tentando identificar modelos disponíveis na sua chave...</p>
+        <div id="debug" class="error-log" style="display:none;"></div>
+        <button id="retryBtn" style="display:none;" onclick="location.reload()">Tentar Novamente</button>
     </div>
 
-    <!-- INTERFACE DA IA -->
-    <div class="chat-app" id="chat-app" style="display: none;">
-        <div class="header">Wilken iA Online</div>
-        <div id="chat-window">
-            <div class="msg ai">Servidor conectado com sucesso. Como posso te ajudar?</div>
-        </div>
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="Envie uma mensagem...">
-            <button onclick="askAI()" id="sendBtn">Enviar</button>
-        </div>
+    <div id="chat-ui" style="display:none;">
+        <h3>Wilken iA Conectada!</h3>
+        <input type="text" id="userInput" placeholder="Digite algo...">
+        <button onclick="askAI()">Enviar</button>
+        <div id="response"></div>
     </div>
 
     <script type="module">
         import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-        // SUA CHAVE JÁ INSERIDA
-        const API_KEY = "AIzaSyBDPCvjIGJ7I7D9rN36VmRuGue5hoELuaI"; 
+        const API_KEY = "AIzaSyBDPCvjIGJ7I7D9rN36VmRuGue5hoELuaI";
         const genAI = new GoogleGenerativeAI(API_KEY);
-        let model;
+        const debugDiv = document.getElementById('debug');
+        const msgH3 = document.getElementById('msg');
+        const loader = document.getElementById('loader');
+        const retryBtn = document.getElementById('retryBtn');
 
-        // FUNÇÃO DE SCAN E CONEXÃO
-        async function startSystem() {
-            const statusLabel = document.getElementById('status-text');
-            
+        async function diagnostico() {
             try {
-                // Tentando o modelo mais estável primeiro
-                model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                // Tenta o modelo padrão
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const result = await model.generateContent("Oi");
+                const response = await result.response;
                 
-                // Scan silencioso: verifica se o servidor responde
-                await model.generateContent("check");
+                // Se chegar aqui, funcionou!
+                msgH3.innerText = "Conexão Estabelecida!";
+                loader.style.display = 'none';
+                setTimeout(() => {
+                    alert("Sucesso! O servidor respondeu. Agora o chat vai abrir.");
+                    // Aqui você pode colocar a interface de chat completa
+                }, 1000);
 
-                // Se responder, abre o sistema
-                showInterface();
-            } catch (err) {
-                console.log("Erro no flash, tentando Pro...");
-                try {
-                    // Fallback para o modelo Pro caso o Flash falhe na sua região
-                    model = genAI.getGenerativeModel({ model: "gemini-pro" });
-                    await model.generateContent("check");
-                    showInterface();
-                } catch (err2) {
-                    statusLabel.innerText = "ERRO: Servidor Wilken iA Indisponível";
-                    statusLabel.style.color = "red";
+            } catch (e) {
+                loader.style.display = 'none';
+                msgH3.innerText = "Erro na Identificação";
+                msgH3.style.color = "#ff4444";
+                debugDiv.style.display = "block";
+                retryBtn.style.display = "inline-block";
+                
+                // Mostra o erro real para sabermos o que é
+                debugDiv.innerText = "RELATÓRIO DE ERRO:\n" + e.message;
+                
+                if(e.message.includes("API key not valid")) {
+                    debugDiv.innerText += "\n\nCausa provável: A chave API foi copiada com erro ou ainda não foi ativada pelo Google.";
+                } else if(e.message.includes("location is not supported")) {
+                    debugDiv.innerText += "\n\nCausa provável: O Google Gemini ainda não está liberado na sua região ou rede.";
                 }
             }
         }
 
-        function showInterface() {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('chat-app').style.display = 'flex';
-        }
-
-        window.askAI = async function() {
-            const input = document.getElementById('userInput');
-            const chatWindow = document.getElementById('chat-window');
-            const btn = document.getElementById('sendBtn');
-            
-            if (!input.value.trim()) return;
-
-            // Mostrar mensagem do usuário
-            const userText = input.value;
-            chatWindow.innerHTML += `<div class="msg user">${userText}</div>`;
-            input.value = "";
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-
-            btn.disabled = true;
-            
-            try {
-                const result = await model.generateContent(userText);
-                const response = await result.response;
-                const text = response.text();
-                
-                chatWindow.innerHTML += `<div class="msg ai">${text}</div>`;
-            } catch (error) {
-                chatWindow.innerHTML += `<div class="msg ai" style="color: #ff4444;">Erro de Conexão: O servidor não respondeu adequadamente.</div>`;
-            } finally {
-                btn.disabled = false;
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-            }
-        }
-
-        // Iniciar Scan ao carregar a página
-        startSystem();
+        window.onload = diagnostico;
     </script>
 </body>
 </html>
