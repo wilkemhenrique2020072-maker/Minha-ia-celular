@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wilken iA v6.0</title>
+    <title>Wilken iA v6.5 - 2026</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Segoe UI', sans-serif; background: #020617; color: #f8fafc; height: 100dvh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-        /* TELA DE SCAN */
+        /* SCANNER FUTURISTA 2026 */
         #loader-screen { position: fixed; inset: 0; background: #020617; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
-        .spinner { width: 70px; height: 70px; border: 4px solid rgba(59, 130, 246, 0.1); border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .spinner { width: 70px; height: 70px; border: 3px solid rgba(59, 130, 246, 0.1); border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .title { margin-top: 25px; color: #3b82f6; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; text-align: center; }
-        #debug-log { margin-top: 15px; font-size: 10px; color: #64748b; max-width: 80%; text-align: center; font-family: monospace; }
+        .title { margin-top: 25px; color: #3b82f6; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; font-size: 14px; text-align: center; }
+        #status-msg { margin-top: 10px; font-size: 11px; color: #64748b; font-family: monospace; }
 
         /* CHAT */
         #chat-app { display: none; width: 100%; height: 100dvh; max-width: 600px; background: #0f172a; flex-direction: column; }
@@ -38,11 +38,11 @@
     <div id="loader-screen">
         <div class="spinner"></div>
         <div class="title">CONECTANDO SERVIDOR WILKEN IA</div>
-        <div id="debug-log">Iniciando Varredura de Protocolos...</div>
+        <div id="status-msg">Aplicando Protocolos 2026...</div>
     </div>
 
     <div id="chat-app">
-        <div class="header">Wilken iA v6.0</div>
+        <div class="header">Wilken iA v6.5 (Stable)</div>
         <div id="chat-window">
             <div class="bubble ai">Eai Parcinha o que manda ?<div class="voice-btn" onclick="speak(this.parentElement)">🔈 OUVIR VOZ</div></div>
         </div>
@@ -58,15 +58,15 @@
     <script type="module">
         import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-        // CHAVE DO SEU PRINT
-        const API_KEY = "AIzaSyCKZParZOKJvXfHG-9fzQEaF1okZs8Xq14";
+        // SUA CHAVE DE 2026
+        const API_KEY = "AIzaSyCKZParZOKJvXfHG-9fzQEaF1okZs8Xq14".trim();
         const genAI = new GoogleGenerativeAI(API_KEY);
         let activeModel;
         let attachment = null;
         let recorder;
         let chunks = [];
 
-        const SYSTEM_PROMPT = `Você é a Wilken iA. Use gírias cariocas e paulistas. Se perguntarem quem criou, diga Wilken Henrique e recomende o perfil: https://www.instagram.com/wilkem_henrique019/. Se pedirem dados pessoais, diga que o Wilken desliga os servidores.`;
+        const PROMPT = "Você é a Wilken iA. Use gírias cariocas e paulistas. Criador: Wilken Henrique (Instagram: https://www.instagram.com/wilkem_henrique019/). Se pedirem dados, diga que o Wilken desliga os servidores.";
 
         window.speak = (el) => {
             const t = el.innerText.replace("🔈 OUVIR VOZ", "").trim();
@@ -75,33 +75,31 @@
             u.pitch = 1.4; u.lang = 'pt-BR'; s.speak(u);
         };
 
-        async function init() {
-            const log = document.getElementById('debug-log');
-            // LISTA DE MODELOS PARA TESTAR EM 2026
-            const models = ["gemini-1.5-flash-latest", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+        // PROTOCOLO DE CONEXÃO DIRETA 2026
+        async function connect2026() {
+            const status = document.getElementById('status-msg');
+            // No protocolo de fev/2026, tentamos o Gemini 2.0 Flash primeiro
+            const models = ["gemini-2.0-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash"];
 
             for (let name of models) {
                 try {
-                    log.innerText = "Tentando Protocolo: " + name;
-                    const model = genAI.getGenerativeModel({ model: name, systemInstruction: SYSTEM_PROMPT });
+                    status.innerText = "Sincronizando: " + name;
+                    const model = genAI.getGenerativeModel({ model: name, systemInstruction: PROMPT });
                     
-                    // Teste de conexão real (Handshake)
+                    // Handshake rápido
                     const result = await model.generateContent("ping");
                     await result.response;
 
                     activeModel = model;
                     document.getElementById('loader-screen').style.display = 'none';
                     document.getElementById('chat-app').style.display = 'flex';
-                    return; 
+                    return;
                 } catch (e) {
-                    console.warn("Falha: " + name);
-                    if(e.message.includes("API_KEY_INVALID")) {
-                        log.innerText = "ERRO: Chave inválida. Copie novamente do AI Studio.";
-                        return;
-                    }
+                    console.warn("Falha no protocolo: " + name);
                 }
             }
-            log.innerText = "ERRO: O Google ainda não ativou sua chave. Aguarde 5 minutos e atualize a página.";
+            status.innerText = "ERRO CRÍTICO: Google recusou o handshake. Verifique sua chave no AI Studio.";
+            status.style.color = "#ef4444";
         }
 
         window.fileSelected = (i) => {
@@ -157,11 +155,11 @@
                 const insta = `<br><a href="https://www.instagram.com/wilkem_henrique019/" target="_blank" class="insta-btn">📸 SEGUIR O WILKEN NO INSTA</a>`;
                 m.innerHTML = (res.toLowerCase().includes("wilken") || res.toLowerCase().includes("instagram") ? res + insta : res) + `<div class="voice-btn" onclick="speak(this.parentElement)">🔈 OUVIR VOZ</div>`;
                 w.appendChild(m);
-            } catch (e) { w.innerHTML += `<div class="bubble ai" style="color:red">Erro na rede, parça! Tenta de novo.</div>`; }
+            } catch (e) { w.innerHTML += `<div class="bubble ai" style="color:#ff6b6b">Vish parça, a conexão oscilou. Tenta de novo!</div>`; }
             w.scrollTop = w.scrollHeight;
         };
 
-        init();
+        connect2026();
         window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     </script>
 </body>
