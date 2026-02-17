@@ -85,30 +85,45 @@
             synth.speak(utter);
         };
 
+        // --- FUNÇÃO CORRIGIDA ---
         async function initScan() {
             const dbg = document.getElementById('debug-log');
-            // Protocolos mais estáveis de fevereiro de 2026
-            const models = ["gemini-1.5-flash-latest", "gemini-1.5-flash", "gemini-pro"];
+            const scanTitle = document.getElementById('scan-title');
             
+            // Modelos mais estáveis e atuais. "gemini-pro" foi removido.
+            const models = ["gemini-1.5-flash-latest", "gemini-1.5-flash"];
+            
+            scanTitle.innerText = "CONECTANDO SERVIDOR WILKEN IA";
+
             for (let name of models) {
                 try {
+                    scanTitle.innerText = `SINCRONIZANDO CANAL ${name.toUpperCase()}...`;
                     activeModel = genAI.getGenerativeModel({ model: name, systemInstruction: PROMPT });
+                    
+                    // Teste simples para validar o modelo
                     const result = await activeModel.generateContent("Oi");
                     await result.response;
                     
+                    // Se funcionar, esconde a tela de loading e mostra o chat
                     document.getElementById('loader-screen').style.display = 'none';
                     document.getElementById('chat-app').style.display = 'flex';
-                    return;
+                    return; // Sai da função com sucesso
                 } catch (e) {
                     console.warn("Falha no canal " + name);
                     dbg.style.display = "block";
-                    dbg.innerText = "Sincronizando chave... " + e.message;
+                    dbg.innerText = `Falha no canal ${name}. Tentando próximo...`;
                 }
             }
+
+            // Se o loop terminar e nenhum modelo funcionar
+            scanTitle.innerText = "FALHA NA CONEXÃO";
+            dbg.style.display = "block";
+            dbg.innerText = "Não foi possível conectar a nenhum servidor da IA. Verifique sua chave de API ou tente novamente mais tarde.";
         }
 
         window.fileSelected = (input) => {
             const file = input.files[0];
+            if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
                 attachmentData = { inlineData: { data: e.target.result.split(',')[1], mimeType: file.type } };
@@ -119,26 +134,34 @@
         };
 
         window.toggleAudio = async () => {
+            const micBtn = document.getElementById('micBtn');
             if (!recorder || recorder.state === "inactive") {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                recorder = new MediaRecorder(stream);
-                recorder.ondataavailable = (e) => chunks.push(e.data);
-                recorder.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'audio/mp3' });
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        attachmentData = { inlineData: { data: e.target.result.split(',')[1], mimeType: "audio/mp3" } };
-                        document.getElementById('file-status').style.display = 'block';
-                        document.getElementById('file-status').innerText = "🎙️ Áudio gravado!";
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    recorder = new MediaRecorder(stream);
+                    recorder.ondataavailable = (e) => chunks.push(e.data);
+                    recorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: 'audio/mp3' });
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            attachmentData = { inlineData: { data: e.target.result.split(',')[1], mimeType: "audio/mp3" } };
+                            document.getElementById('file-status').style.display = 'block';
+                            document.getElementById('file-status').innerText = "🎙️ Áudio gravado!";
+                        };
+                        reader.readAsDataURL(blob);
+                        chunks = [];
+                        // Para o stream de áudio para o ícone do microfone parar de piscar no navegador
+                        stream.getTracks().forEach(track => track.stop());
                     };
-                    reader.readAsDataURL(blob);
-                    chunks = [];
-                };
-                recorder.start();
-                document.getElementById('micBtn').classList.add('active');
+                    recorder.start();
+                    micBtn.classList.add('active');
+                } catch (err) {
+                    console.error("Erro ao acessar microfone:", err);
+                    alert("Não foi possível acessar o microfone. Por favor, verifique as permissões.");
+                }
             } else {
                 recorder.stop();
-                document.getElementById('micBtn').classList.remove('active');
+                micBtn.classList.remove('active');
             }
         };
 
@@ -148,17 +171,25 @@
             const text = input.value.trim();
             if (!text && !attachmentData) return;
 
-            chatWindow.innerHTML += `<div class="bubble user">${text || "Anexo enviado"}</div>`;
+            const userBubble = document.createElement('div');
+            userBubble.className = 'bubble user';
+            userBubble.innerText = text || "Anexo enviado";
+            chatWindow.appendChild(userBubble);
+            
             input.value = "";
             document.getElementById('file-status').style.display = 'none';
             chatWindow.scrollTop = chatWindow.scrollHeight;
 
             try {
-                const parts = [text || "Analise isso"];
-                if (attachmentData) parts.push(attachmentData);
+                const parts = [];
+                if (text) parts.push(text);
+                if (attachmentData) {
+                    parts.push(attachmentData);
+                    if (!text) parts.unshift("Analise este anexo."); // Adiciona um texto padrão se só houver anexo
+                }
                 
-                const result = await activeModel.generateContent(parts);
-                let resText = result.response.text();
+                const result = await activeModel.generateContent({ contents: [{ role: "user", parts }] });
+                const resText = result.response.text();
                 attachmentData = null;
 
                 const aiMsg = document.createElement('div');
@@ -166,21 +197,33 @@
                 
                 const instaBtn = `<br><a href="https://www.instagram.com/wilkem_henrique019/" target="_blank" class="insta-btn">📸 SEGUIR O WILKEN NO INSTA</a>`;
                 
+                let formattedText = resText;
                 if (resText.toLowerCase().includes("wilken") || resText.toLowerCase().includes("instagram")) {
-                    aiMsg.innerHTML = resText + instaBtn;
-                } else {
-                    aiMsg.innerHTML = resText;
+                    formattedText += instaBtn;
                 }
 
-                aiMsg.innerHTML += `<div class="voice-btn" onclick="textToSpeech(this.parentElement)">🔈 OUVIR VOZ</div>`;
+                aiMsg.innerHTML = formattedText + `<div class="voice-btn" onclick="textToSpeech(this.parentElement)">🔈 OUVIR VOZ</div>`;
                 chatWindow.appendChild(aiMsg);
+
             } catch (err) {
-                chatWindow.innerHTML += `<div class="bubble ai">Ih parça, a conexão oscilou. Tenta de novo!</div>`;
+                console.error("Erro da IA:", err);
+                const errorBubble = document.createElement('div');
+                errorBubble.className = 'bubble ai';
+                errorBubble.innerText = "Ih parça, a conexão oscilou. Tenta de novo!";
+                chatWindow.appendChild(errorBubble);
             }
             chatWindow.scrollTop = chatWindow.scrollHeight;
         };
 
+        // Adiciona evento para enviar com a tecla Enter
+        document.getElementById('userInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                askAI();
+            }
+        });
+
         initScan();
+        // Garante que as vozes sejam carregadas
         window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     </script>
 </body>
