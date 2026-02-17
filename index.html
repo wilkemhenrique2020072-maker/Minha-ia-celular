@@ -3,33 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wilken iA v6.5 - 2026</title>
+    <title>Wilken iA v6.6</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Segoe UI', sans-serif; background: #020617; color: #f8fafc; height: 100dvh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-        /* SCANNER FUTURISTA 2026 */
+        /* SCANNER */
         #loader-screen { position: fixed; inset: 0; background: #020617; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
-        .spinner { width: 70px; height: 70px; border: 3px solid rgba(59, 130, 246, 0.1); border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
+        .spinner { width: 60px; height: 60px; border: 3px solid rgba(59, 130, 246, 0.1); border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .title { margin-top: 25px; color: #3b82f6; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; font-size: 14px; text-align: center; }
-        #status-msg { margin-top: 10px; font-size: 11px; color: #64748b; font-family: monospace; }
+        .title { margin-top: 25px; color: #3b82f6; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; }
+        #debug-box { margin-top: 15px; font-size: 10px; color: #ef4444; max-width: 85%; text-align: center; font-family: monospace; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 5px; display: none; }
 
         /* CHAT */
         #chat-app { display: none; width: 100%; height: 100dvh; max-width: 600px; background: #0f172a; flex-direction: column; }
-        .header { padding: 15px; background: #1e293b; border-bottom: 2px solid #3b82f6; text-align: center; color: #3b82f6; font-weight: bold; font-size: 18px; }
+        .header { padding: 15px; background: #1e293b; border-bottom: 2px solid #3b82f6; text-align: center; color: #3b82f6; font-weight: bold; }
         #chat-window { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
         .bubble { padding: 12px 16px; border-radius: 18px; max-width: 85%; font-size: 15px; line-height: 1.5; word-wrap: break-word; }
         .user { background: #2563eb; align-self: flex-end; border-bottom-right-radius: 4px; }
         .ai { background: #1e293b; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #334155; }
         
         .voice-btn { margin-top: 10px; font-size: 11px; color: #3b82f6; cursor: pointer; font-weight: bold; border-top: 1px solid #334155; padding-top: 8px; display: flex; align-items: center; gap: 5px; }
-        .insta-btn { display: inline-block; margin-top: 10px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: white!important; padding: 10px 15px; border-radius: 12px; text-decoration: none!important; font-weight: bold; font-size: 13px; text-align: center; width: 100%; }
+        .insta-btn { display: inline-block; margin-top: 10px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: white!important; padding: 10px 15px; border-radius: 12px; text-decoration: none!important; font-weight: bold; font-size: 13px; text-align: center; }
 
         .input-box { padding: 10px; background: #1e293b; display: flex; align-items: center; gap: 8px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
         input { flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #334155; background: #020617; color: white; outline: none; font-size: 16px; }
         button { background: #2563eb; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .icon-btn { background: none; border: none; color: #94a3b8; }
         #file-status { display: none; background: #1e293b; color: #3b82f6; padding: 5px; font-size: 11px; text-align: center; }
     </style>
 </head>
@@ -37,19 +36,19 @@
 
     <div id="loader-screen">
         <div class="spinner"></div>
-        <div class="title">CONECTANDO SERVIDOR WILKEN IA</div>
-        <div id="status-msg">Aplicando Protocolos 2026...</div>
+        <div class="title">Sincronizando Wilken iA</div>
+        <div id="debug-box"></div>
     </div>
 
     <div id="chat-app">
-        <div class="header">Wilken iA v6.5 (Stable)</div>
+        <div class="header">Wilken iA v6.6 2026</div>
         <div id="chat-window">
             <div class="bubble ai">Eai Parcinha o que manda ?<div class="voice-btn" onclick="speak(this.parentElement)">🔈 OUVIR VOZ</div></div>
         </div>
         <div id="file-status"></div>
         <div class="input-box">
-            <label class="icon-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg><input type="file" id="fileInput" style="display:none" onchange="fileSelected(this)"></label>
-            <button class="icon-btn" id="micBtn" onclick="toggleMic()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 18v4M8 22h8"/></svg></button>
+            <label style="cursor:pointer; color:#94a3b8"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg><input type="file" id="fileInput" style="display:none" onchange="fileSelected(this)"></label>
+            <button style="background:none; color:#94a3b8" id="micBtn" onclick="toggleMic()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 18v4M8 22h8"/></svg></button>
             <input type="text" id="userInput" placeholder="Manda a letra...">
             <button onclick="askAI()" id="sendBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
         </div>
@@ -58,8 +57,7 @@
     <script type="module">
         import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-        // SUA CHAVE DE 2026
-        const API_KEY = "AIzaSyCKZParZOKJvXfHG-9fzQEaF1okZs8Xq14".trim();
+        const API_KEY = "AIzaSyCKZParZOKJvXfHG-9fzQEaF1okZs8Xq14";
         const genAI = new GoogleGenerativeAI(API_KEY);
         let activeModel;
         let attachment = null;
@@ -75,31 +73,31 @@
             u.pitch = 1.4; u.lang = 'pt-BR'; s.speak(u);
         };
 
-        // PROTOCOLO DE CONEXÃO DIRETA 2026
-        async function connect2026() {
-            const status = document.getElementById('status-msg');
-            // No protocolo de fev/2026, tentamos o Gemini 2.0 Flash primeiro
-            const models = ["gemini-2.0-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash"];
+        // NOVO PROTOCOLO DE HANDSHAKE 2026
+        async function init() {
+            const debug = document.getElementById('debug-box');
+            // Tentando os modelos estáveis (removendo a versão beta da chamada)
+            const models = ["gemini-1.5-flash-latest", "gemini-1.5-flash", "gemini-pro"];
 
             for (let name of models) {
                 try {
-                    status.innerText = "Sincronizando: " + name;
+                    console.log("Tentando canal: " + name);
                     const model = genAI.getGenerativeModel({ model: name, systemInstruction: PROMPT });
                     
-                    // Handshake rápido
-                    const result = await model.generateContent("ping");
+                    // Em vez de ping, fazemos uma chamada real curta
+                    const result = await model.generateContent("Oi");
                     await result.response;
 
                     activeModel = model;
                     document.getElementById('loader-screen').style.display = 'none';
                     document.getElementById('chat-app').style.display = 'flex';
-                    return;
+                    return; 
                 } catch (e) {
-                    console.warn("Falha no protocolo: " + name);
+                    debug.style.display = "block";
+                    debug.innerText = "Log técnico: " + e.message;
                 }
             }
-            status.innerText = "ERRO CRÍTICO: Google recusou o handshake. Verifique sua chave no AI Studio.";
-            status.style.color = "#ef4444";
+            debug.innerText = "ERRO: O Google bloqueou a chave. Verifique se o seu projeto no AI Studio está com a 'Generative Language API' ativa.";
         }
 
         window.fileSelected = (i) => {
@@ -159,7 +157,7 @@
             w.scrollTop = w.scrollHeight;
         };
 
-        connect2026();
+        init();
         window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     </script>
 </body>
